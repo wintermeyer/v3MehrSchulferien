@@ -210,7 +210,8 @@ defmodule MehrSchulferien.Calendar do
 
   """
   def list_days do
-    Repo.all(Day)
+    query = from d in MehrSchulferien.Calendar.Day, order_by: d.slug
+    Repo.all(query)
   end
 
   @doc """
