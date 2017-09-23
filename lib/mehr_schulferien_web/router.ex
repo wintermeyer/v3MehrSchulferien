@@ -18,9 +18,15 @@ defmodule MehrSchulferienWeb.Router do
 
     get "/", PageController, :index
 
+    # Calendar
+    #
     resources "/years", YearController
     resources "/months", MonthController
     resources "/days", DayController
+
+    # Location
+    #
+    resources "/countries", CountryController
   end
 
   # Other scopes may use custom stacks.

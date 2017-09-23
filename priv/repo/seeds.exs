@@ -11,6 +11,7 @@
 # and so on) as they will fail if something goes wrong.
 
 alias MehrSchulferien.Calendar
+alias MehrSchulferien.Location
 import Ecto.Query
 
 # Years 2016-2020
@@ -37,3 +38,10 @@ Enum.each (2016..2020), fn year_number ->
     end
   end
 end
+
+# Location
+#
+
+# Create Germany as a country
+#
+{:ok, germany} = Location.create_country(%{name: "Deutschland"})
