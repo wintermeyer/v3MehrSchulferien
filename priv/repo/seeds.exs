@@ -14,9 +14,9 @@ alias MehrSchulferien.Calendar
 alias MehrSchulferien.Location
 import Ecto.Query
 
-# Years 2016-2020
+# Years 2016-2021
 #
-Enum.each (2016..2020), fn year_number ->
+Enum.each (2016..2021), fn year_number ->
   case Calendar.create_year(%{value: year_number}) do
     {:ok, year} ->
       {:ok, first_day} = Date.from_erl({year_number, 1, 1})
