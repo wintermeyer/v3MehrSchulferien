@@ -17,9 +17,9 @@ defmodule MehrSchulferien.Location.School do
     field :name, :string
     field :phone_number, :string
     field :slug, :string
-    field :city_id, :id
-    field :federal_state_id, :id
-    field :country_id, :id
+    belongs_to :city, MehrSchulferien.Location.City
+    belongs_to :federal_state, MehrSchulferien.Location.FederalState
+    belongs_to :country, MehrSchulferien.Location.Country
 
     timestamps()
   end
@@ -32,6 +32,9 @@ defmodule MehrSchulferien.Location.School do
     |> set_address_zip_code
     |> set_slug
     |> unique_constraint(:slug)
+    |> assoc_constraint(:country)
+    |> assoc_constraint(:federal_state)
+    |> assoc_constraint(:city)
   end
 
   defp set_address_zip_code(changeset) do

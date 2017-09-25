@@ -20,6 +20,7 @@ defmodule MehrSchulferien.Location.FederalState do
     |> validate_required([:name])
     |> set_slug
     |> unique_constraint(:slug)
+    |> assoc_constraint(:country)
   end
 
   defp set_slug(changeset) do

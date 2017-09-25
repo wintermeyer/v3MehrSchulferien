@@ -22,6 +22,8 @@ defmodule MehrSchulferien.Location.City do
     |> validate_required([:name, :zip_code, :country_id, :federal_state_id])
     |> set_slug
     |> unique_constraint(:slug)
+    |> assoc_constraint(:country)
+    |> assoc_constraint(:federal_state)
   end
 
   defp set_slug(changeset) do
