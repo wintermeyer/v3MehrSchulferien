@@ -7,6 +7,7 @@ defmodule MehrSchulferien.Location.FederalState do
 
   schema "federal_states" do
     field :name, :string
+    field :code, :string
     field :slug, :string
     belongs_to :country, MehrSchulferien.Location.Country
 
@@ -16,10 +17,11 @@ defmodule MehrSchulferien.Location.FederalState do
   @doc false
   def changeset(%FederalState{} = federal_state, attrs) do
     federal_state
-    |> cast(attrs, [:name, :slug, :country_id])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :code, :slug, :country_id])
+    |> validate_required([:name, :code])
     |> set_slug
     |> unique_constraint(:slug)
+    |> unique_constraint(:code)
     |> assoc_constraint(:country)
   end
 

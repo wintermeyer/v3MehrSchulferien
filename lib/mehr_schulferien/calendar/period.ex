@@ -26,7 +26,7 @@ defmodule MehrSchulferien.Calendar.Period do
     |> validate_required([:starts_on, :ends_on, :name, :category])
     |> validate_one_of_present([:country_id, :federal_state_id, :city_id, :school_id])
     |> validate_starts_on_is_before_or_equal_ends_on
-    |> validate_inclusion(:category, ["Schulferien", "Gesetzlicher Feiertag", "Wochenende", "Katholischer Feiertag", "Evangelischer Feiertag", "Jüdischer Feiertag", "Islamischer Feiertag" ])
+    |> validate_inclusion(:category, ["Schulferien", "Gesetzlicher Feiertag", "Wochenende", "Katholischer Feiertag", "Evangelischer Feiertag", "Jüdischer Feiertag", "Islamischer Feiertag", "Schulfrei" ])
     # |> unique_constraint(:slug)
   end
 
