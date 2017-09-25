@@ -23,6 +23,7 @@ defmodule MehrSchulferienWeb.Router do
     resources "/years", YearController
     resources "/months", MonthController
     resources "/days", DayController
+    resources "/periods", PeriodController
 
     # Location
     #

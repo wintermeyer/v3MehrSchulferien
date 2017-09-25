@@ -194,4 +194,74 @@ defmodule MehrSchulferien.CalendarTest do
       assert %Ecto.Changeset{} = Calendar.change_day(day)
     end
   end
+
+  describe "periods" do
+    alias MehrSchulferien.Calendar.Period
+
+    @valid_attrs %{category: "some category", ends_on: ~D[2010-04-17], name: "some name", slug: "some slug", source: "some source", starts_on: ~D[2010-04-17]}
+    @update_attrs %{category: "some updated category", ends_on: ~D[2011-05-18], name: "some updated name", slug: "some updated slug", source: "some updated source", starts_on: ~D[2011-05-18]}
+    @invalid_attrs %{category: nil, ends_on: nil, name: nil, slug: nil, source: nil, starts_on: nil}
+
+    def period_fixture(attrs \\ %{}) do
+      {:ok, period} =
+        attrs
+        |> Enum.into(@valid_attrs)
+        |> Calendar.create_period()
+
+      period
+    end
+
+    test "list_periods/0 returns all periods" do
+      period = period_fixture()
+      assert Calendar.list_periods() == [period]
+    end
+
+    test "get_period!/1 returns the period with given id" do
+      period = period_fixture()
+      assert Calendar.get_period!(period.id) == period
+    end
+
+    test "create_period/1 with valid data creates a period" do
+      assert {:ok, %Period{} = period} = Calendar.create_period(@valid_attrs)
+      assert period.category == "some category"
+      assert period.ends_on == ~D[2010-04-17]
+      assert period.name == "some name"
+      assert period.slug == "some slug"
+      assert period.source == "some source"
+      assert period.starts_on == ~D[2010-04-17]
+    end
+
+    test "create_period/1 with invalid data returns error changeset" do
+      assert {:error, %Ecto.Changeset{}} = Calendar.create_period(@invalid_attrs)
+    end
+
+    test "update_period/2 with valid data updates the period" do
+      period = period_fixture()
+      assert {:ok, period} = Calendar.update_period(period, @update_attrs)
+      assert %Period{} = period
+      assert period.category == "some updated category"
+      assert period.ends_on == ~D[2011-05-18]
+      assert period.name == "some updated name"
+      assert period.slug == "some updated slug"
+      assert period.source == "some updated source"
+      assert period.starts_on == ~D[2011-05-18]
+    end
+
+    test "update_period/2 with invalid data returns error changeset" do
+      period = period_fixture()
+      assert {:error, %Ecto.Changeset{}} = Calendar.update_period(period, @invalid_attrs)
+      assert period == Calendar.get_period!(period.id)
+    end
+
+    test "delete_period/1 deletes the period" do
+      period = period_fixture()
+      assert {:ok, %Period{}} = Calendar.delete_period(period)
+      assert_raise Ecto.NoResultsError, fn -> Calendar.get_period!(period.id) end
+    end
+
+    test "change_period/1 returns a period changeset" do
+      period = period_fixture()
+      assert %Ecto.Changeset{} = Calendar.change_period(period)
+    end
+  end
 end
