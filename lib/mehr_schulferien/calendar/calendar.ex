@@ -23,7 +23,9 @@ defmodule MehrSchulferien.Calendar do
   end
 
   @doc """
-  Gets a single year.
+  Gets a single year. It first searches for slugs and than for ids.
+  It is tricky because an id contains of integers and so does the
+  slug for years.
 
   Raises `Ecto.NoResultsError` if the Year does not exist.
 
@@ -32,11 +34,22 @@ defmodule MehrSchulferien.Calendar do
       iex> get_year!(123)
       %Year{}
 
+      iex> get_year!(2017)
+      %Year{}
+
       iex> get_year!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_year!(id), do: Repo.get!(Year, id)
+  def get_year!(id_or_slug) do
+    query = from y in Year, where: y.slug == ^id_or_slug
+    year = Repo.one(query)
+
+    case year do
+      nil -> Repo.get!(Year, id_or_slug)
+      _ -> year
+    end
+  end
 
   @doc """
   Creates a year.

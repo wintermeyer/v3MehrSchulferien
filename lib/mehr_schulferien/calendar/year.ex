@@ -4,7 +4,7 @@ defmodule MehrSchulferien.Calendar.Year do
   alias MehrSchulferien.Calendar.Year
   alias MehrSchulferien.Calendar.YearSlug
 
-
+  @derive {Phoenix.Param, key: :slug}
   schema "years" do
     field :value, :integer
     field :slug, YearSlug.Type
