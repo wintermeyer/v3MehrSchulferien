@@ -118,7 +118,7 @@ defmodule MehrSchulferien.Location do
   end
 
   @doc """
-  Gets a single federal_state.
+  Gets a single federal_state by id (integer) or slug (string).
 
   Raises `Ecto.NoResultsError` if the Federal state does not exist.
 
@@ -127,11 +127,22 @@ defmodule MehrSchulferien.Location do
       iex> get_federal_state!(123)
       %FederalState{}
 
+      iex> get_federal_state!("example")
+      %FederalState{}
+
       iex> get_federal_state!(456)
       ** (Ecto.NoResultsError)
 
   """
-  def get_federal_state!(id), do: Repo.get!(FederalState, id)
+  def get_federal_state!(id_or_slug) do
+    case Regex.match?(~r/^[0-9]+$/, id_or_slug) do
+      true ->
+        Repo.get!(FederalState, id_or_slug)
+      false ->
+        query = from f in FederalState, where: f.slug == ^id_or_slug
+        Repo.one(query)
+    end
+  end
 
   @doc """
   Creates a federal_state.

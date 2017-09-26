@@ -4,7 +4,7 @@ defmodule MehrSchulferien.Location.FederalState do
   alias MehrSchulferien.Location.FederalState
   alias MehrSchulferien.Location.FederalStateSlug
 
-
+  @derive {Phoenix.Param, key: :slug}
   schema "federal_states" do
     field :name, :string
     field :code, :string
