@@ -4,6 +4,7 @@ defmodule MehrSchulferien.Repo.Migrations.CreateDays do
   def change do
     create table(:days) do
       add :value, :integer
+      add :date_value, :date
       add :slug, :string
       add :day_of_year, :integer
       add :weekday, :integer
@@ -15,6 +16,7 @@ defmodule MehrSchulferien.Repo.Migrations.CreateDays do
     end
 
     create unique_index(:days, [:slug])
+    create unique_index(:days, [:date_value])
     create index(:days, [:year_id])
     create index(:days, [:month_id])
   end

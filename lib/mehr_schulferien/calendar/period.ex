@@ -28,6 +28,7 @@ defmodule MehrSchulferien.Calendar.Period do
     |> validate_starts_on_is_before_or_equal_ends_on
     |> validate_inclusion(:category, ["Schulferien", "Gesetzlicher Feiertag", "Wochenende", "Katholischer Feiertag", "Evangelischer Feiertag", "Jüdischer Feiertag", "Islamischer Feiertag", "Schulfrei" ])
     # |> unique_constraint(:slug)
+    # TODO: generate a slug
   end
 
   defp validate_starts_on_is_before_or_equal_ends_on(changeset) do

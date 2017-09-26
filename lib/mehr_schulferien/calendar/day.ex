@@ -8,6 +8,7 @@ defmodule MehrSchulferien.Calendar.Day do
   schema "days" do
     field :slug, :string
     field :value, :integer
+    field :date_value, :date
     field :weekday, :integer
     field :weekday_de, :string
     field :day_of_year, :integer
@@ -20,7 +21,7 @@ defmodule MehrSchulferien.Calendar.Day do
   @doc false
   def changeset(%Day{} = day, attrs) do
     day
-    |> cast(attrs, [:value, :year_id, :month_id])
+    |> cast(attrs, [:value, :year_id, :month_id, :date_value])
     |> validate_required([:value, :year_id, :month_id])
     |> validate_inclusion(:value, 1..31)
     |> assoc_constraint(:year)
@@ -29,11 +30,24 @@ defmodule MehrSchulferien.Calendar.Day do
     |> DaySlug.unique_constraint
     |> unique_constraint(:slug)
     |> set_weekday
+    |> set_date_value
     |> validate_inclusion(:weekday, 1..7)
     |> set_weekday_de
     |> validate_inclusion(:weekday_de, ["Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag", "Sonntag"])
     |> set_day_of_year
     |> validate_inclusion(:day_of_year, 1..366)
+  end
+
+  defp set_date_value(changeset) do
+    [year, month, day] = year_month_day(changeset)
+    date_value = get_field(changeset, :date_value)
+
+    case date_value do
+      nil ->
+        date = Date.from_erl!({year, month, day})
+        put_change(changeset, :date_value, date)
+      _ -> changeset
+    end
   end
 
   defp set_weekday(changeset) do
