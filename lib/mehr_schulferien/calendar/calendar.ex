@@ -352,12 +352,6 @@ defmodule MehrSchulferien.Calendar do
       {:error, %Ecto.Changeset{}}
 
   """
-  # def create_period(attrs \\ %{}) do
-  #   %Period{}
-  #   |> Period.changeset(attrs)
-  #   |> Repo.insert()
-  # end
-
   def create_period(attrs \\ %{}) do
     result = %Period{}
       |> Period.changeset(attrs)
