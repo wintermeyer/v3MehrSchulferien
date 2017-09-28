@@ -14,6 +14,9 @@ defmodule MehrSchulferien.Calendar.Day do
     field :day_of_year, :integer
     belongs_to :year, MehrSchulferien.Calendar.Year
     belongs_to :month, MehrSchulferien.Calendar.Month
+    has_many :slots, MehrSchulferien.Calendar.Slot
+    has_many :periods, through: [:slots, :period]
+
 
     timestamps()
   end

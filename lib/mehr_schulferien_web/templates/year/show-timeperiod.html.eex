@@ -1,0 +1,28 @@
+<h2><%= @federal_state.name %> <%= @year.value %></h2>
+<p>federal_state_id: <%= @federal_state.id %></p>
+
+
+<table border="1">
+<tr>
+  <th>Mo.</th>
+  <th>Di.</th>
+  <th>Mi.</th>
+  <th>Do.</th>
+  <th>Fr.</th>
+  <th>Sa.</th>
+  <th>So.</th>
+</tr>
+
+<%= for week <- @weeks do %>
+<tr>
+<%= for day <- week do %>
+<td>
+  <%= unless day == {} do %>
+  <%= elem(day,1) %>.
+  <% end %>
+</td>
+<% end %>
+</tr>
+<% end %>
+
+</table>

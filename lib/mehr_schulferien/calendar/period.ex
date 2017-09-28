@@ -15,6 +15,8 @@ defmodule MehrSchulferien.Calendar.Period do
     belongs_to :city, MehrSchulferien.Location.City
     belongs_to :federal_state, MehrSchulferien.Location.FederalState
     belongs_to :country, MehrSchulferien.Location.Country
+    has_many :slots, MehrSchulferien.Calendar.Slot
+    has_many :days, through: [:slots, :days]
 
     timestamps()
   end
