@@ -18,7 +18,7 @@
 <%= for day <- week do %>
 <td>
   <%= unless day == {} do %>
-  <%= elem(day,1) %>.
+  <%= elem(day,0)[:value] %>.
   <% end %>
 </td>
 <% end %>

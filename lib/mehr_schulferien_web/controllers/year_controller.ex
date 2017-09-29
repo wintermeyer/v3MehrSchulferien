@@ -64,22 +64,13 @@ defmodule MehrSchulferienWeb.YearController do
                       periods.federal_state_id == ^federal_state.id),
                  left_join: federal_state in MehrSchulferien.Location.FederalState,
                  on:  periods.federal_state_id == federal_state.id,
-                 left_join: country in MehrSchulferien.Location.Country,
-                 on:  periods.country_id == country.id,
                  where: days.date_value >= ^starts_on and
                         days.date_value <= ^ends_on,
                  order_by: days.date_value,
-                 select: {
-                           days.date_value,
-                           days.value,
-                           days.weekday,
-                           periods.id,
-                           periods.name,
-                           country.id,
-                           country.name,
-                           federal_state.id,
-                           federal_state.name
-                         }
+                 select: {map(days, [:date_value, :value, :weekday]),
+                          map(periods, [:id, :name, :slug]),
+                          map(federal_state, [:id, :name, :slug])
+                        }
                 )
 
     days = Repo.all(query) |> Enum.uniq
@@ -87,7 +78,7 @@ defmodule MehrSchulferienWeb.YearController do
     # Fill days with empty elements for the calendar blanks in
     # the first and last line of it.
     #
-    head_fill = case elem(List.first(days),2) do
+    head_fill = case elem(List.first(days),0)[:weekday] do
       1 -> nil
       2 -> [{}]
       3 -> [{},{}]
@@ -97,7 +88,7 @@ defmodule MehrSchulferienWeb.YearController do
       7 -> [{},{},{},{},{},{}]
     end
 
-    tail_fill = case elem(List.last(days),2) do
+    tail_fill = case elem(List.last(days),0)[:weekday] do
       7 -> nil
       6 -> [{}]
       5 -> [{},{}]
