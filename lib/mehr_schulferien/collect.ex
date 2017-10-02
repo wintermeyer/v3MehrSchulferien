@@ -21,6 +21,7 @@ defmodule MehrSchulferien.Collect do
            |> prepare_list_of_months_to_be_displayed
            |> convert_to_maps
            |> inject_list_of_vacation_periods
+           |> inject_list_of_bank_holiday_periods
   end
 
   def convert_to_maps(months) do
@@ -46,6 +47,26 @@ defmodule MehrSchulferien.Collect do
         end |> List.flatten |> Enum.uniq |> Enum.filter(& !is_nil(&1))
 
       Map.put_new(month, :school_vacation_periods, school_vacation_periods)
+    end
+  end
+
+  def inject_list_of_bank_holiday_periods(months) do
+    for month <- months do
+      bank_holiday_periods =
+        for week <- month[:month] do
+          for day <- week do
+            unless day == {} do
+              for period <- day[:periods] do
+                {period_data, country, federal_state} = period
+                if period_data.category == "Gesetzlicher Feiertag" do
+                  period_data
+                end
+              end
+            end
+          end
+        end |> List.flatten |> Enum.uniq |> Enum.filter(& !is_nil(&1))
+
+      Map.put_new(month, :bank_holiday_periods, bank_holiday_periods)
     end
   end
 
