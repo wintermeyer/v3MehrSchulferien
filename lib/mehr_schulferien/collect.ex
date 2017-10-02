@@ -19,6 +19,34 @@ defmodule MehrSchulferien.Collect do
     days = days(starts_on, ends_on, country_id, federal_state_id, city_id, school_id)
            |> chunk_days_to_months
            |> prepare_list_of_months_to_be_displayed
+           |> convert_to_maps
+           |> inject_list_of_vacation_periods
+  end
+
+  def convert_to_maps(months) do
+    for month <- months do
+      %{month: month}
+    end
+  end
+
+  def inject_list_of_vacation_periods(months) do
+    for month <- months do
+      school_vacation_periods =
+        for week <- month[:month] do
+          for day <- week do
+            unless day == {} do
+              for period <- day[:periods] do
+                {period_data, country, federal_state} = period
+                if period_data.category == "Schulferien" do
+                  period_data
+                end
+              end
+            end
+          end
+        end |> List.flatten |> Enum.uniq |> Enum.filter(& !is_nil(&1))
+
+      Map.put_new(month, :school_vacation_periods, school_vacation_periods)
+    end
   end
 
   def chunk_days_to_months(days) do
@@ -137,7 +165,7 @@ defmodule MehrSchulferien.Collect do
                 days.date_value <= ^ends_on,
           order_by: days.date_value,
           select: {map(days, [:date_value, :value, :weekday]),
-                  map(periods, [:id, :name, :slug, :category]),
+                  map(periods, [:id, :name, :slug, :category, :starts_on, :ends_on]),
                   map(country, [:id, :name, :slug]),
                   map(federal_state, [:id, :name, :slug])
                 }
@@ -159,7 +187,7 @@ defmodule MehrSchulferien.Collect do
                 days.date_value <= ^ends_on,
           order_by: days.date_value,
           select: {map(days, [:date_value, :value, :weekday]),
-                  map(periods, [:id, :name, :slug, :category]),
+                  map(periods, [:id, :name, :slug, :category, :starts_on, :ends_on]),
                   map(country, [:id, :name, :slug]),
                   map(federal_state, [:id, :name, :slug])
                 }
@@ -186,21 +214,20 @@ defmodule MehrSchulferien.Collect do
 
   def make_sure_its_a_full_month(starts_on, ends_on) do
     {:ok, starts_on} = Date.from_erl({starts_on.year, starts_on.month, 1})
-    ends_on = case {ends_on.month, Date.leap_year?(ends_on)} do
-      {1, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {2, false} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 28})
-      {2, true} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 29})
-      {3, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {4, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 30})
-      {5, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {6, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 30})
-      {7, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {8, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {9, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 30})
-      {10, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      {11, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 30})
-      {12, _} -> {:ok, ends_on} = Date.from_erl({ends_on.year, ends_on.month, 31})
-      ends_on
+    {:ok, ends_on} = case {ends_on.month, Date.leap_year?(ends_on)} do
+      {1, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {2, false} -> Date.from_erl({ends_on.year, ends_on.month, 28})
+      {2, true} -> Date.from_erl({ends_on.year, ends_on.month, 29})
+      {3, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {4, _} -> Date.from_erl({ends_on.year, ends_on.month, 30})
+      {5, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {6, _} -> Date.from_erl({ends_on.year, ends_on.month, 30})
+      {7, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {8, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {9, _} -> Date.from_erl({ends_on.year, ends_on.month, 30})
+      {10, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
+      {11, _} -> Date.from_erl({ends_on.year, ends_on.month, 30})
+      {12, _} -> Date.from_erl({ends_on.year, ends_on.month, 31})
     end
     {starts_on, ends_on}
   end
