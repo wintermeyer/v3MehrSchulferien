@@ -20,7 +20,7 @@ defmodule MehrSchulferien.Collect do
            |> chunk_days_to_months
            |> prepare_list_of_months_to_be_displayed
            |> convert_to_maps
-           |> inject_list_of_vacation_periods
+           |> inject_list_of_vacation_periods(country_id, federal_state_id)
            |> inject_list_of_bank_holiday_periods
   end
 
@@ -30,7 +30,7 @@ defmodule MehrSchulferien.Collect do
     end
   end
 
-  def inject_list_of_vacation_periods(months) do
+  def inject_list_of_vacation_periods(months, country_id, federal_state_id) do
     for month <- months do
       school_vacation_periods =
         for week <- month[:month] do
@@ -39,7 +39,8 @@ defmodule MehrSchulferien.Collect do
               for period <- day[:periods] do
                 {period_data, country, federal_state} = period
                 if period_data.category == "Schulferien" do
-                  period_data
+                  length = Date.diff(period_data[:ends_on], period_data[:starts_on]) + 1
+                  Map.put_new(period_data, :length, length)
                 end
               end
             end
@@ -48,6 +49,23 @@ defmodule MehrSchulferien.Collect do
 
       Map.put_new(month, :school_vacation_periods, school_vacation_periods)
     end
+  end
+
+  def off_days(starts_on, ends_on, country_id, federal_state_id, city_id \\ nil, school_id \\ nil) do
+    days = MehrSchulferien.Collect.days(Date.add(starts_on, -65), Date.add(ends_on, 65), country_id, federal_state_id, city_id, school_id)
+
+    for day <- days do
+      categories = for period <- day.periods do
+        {period_data, country, federal_state} = period
+        period_data.category
+      end |> List.flatten
+
+      if Enum.member?(categories, "Wochenende") or
+         Enum.member?(categories, "Schulferien") or
+         Enum.member?(categories, "Gesetzlicher Feiertag") do
+         day[:date_value]
+      end
+    end |> Enum.filter(& !is_nil(&1))
   end
 
   def inject_list_of_bank_holiday_periods(months) do
@@ -59,7 +77,8 @@ defmodule MehrSchulferien.Collect do
               for period <- day[:periods] do
                 {period_data, country, federal_state} = period
                 if period_data.category == "Gesetzlicher Feiertag" do
-                  period_data
+                  length = Date.diff(period_data[:ends_on], period_data[:starts_on]) + 1
+                  Map.put_new(period_data, :length, length)
                 end
               end
             end
