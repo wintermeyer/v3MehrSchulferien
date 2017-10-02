@@ -66,6 +66,38 @@ defmodule MehrSchulferien.Collect do
   end
 
   def days(starts_on \\ nil, ends_on \\ nil, country_id \\ "deutschland", federal_state_id \\ nil, city_id \\ nil, school_id \\ nil) do
+    raw_days(starts_on, ends_on, country_id, federal_state_id, city_id, school_id)
+    |> Enum.uniq
+    |> Enum.group_by(fn {date, _, _, _} -> date end, fn {_, period, country, federal_state} -> {period, country, federal_state} end)
+    |> Enum.map(fn {date, periods} -> date
+      |> Map.put(:periods, Enum.reject(periods, fn(x) -> x == {nil,nil,nil} end)) end)
+    |> Enum.sort_by(fn x -> Date.to_string(x[:date_value]) end)
+    |> inject_css_class
+  end
+
+  def inject_css_class(days) do
+    for day <- days do
+      categories = for period <- day.periods do
+        {period_data, country, federal_state} = period
+        period_data.category
+      end |> List.flatten
+
+      css_class = case {
+             Enum.member?(categories, "Wochenende"),
+             Enum.member?(categories, "Schulferien"),
+             Enum.member?(categories, "Gesetzlicher Feiertag")
+           } do
+        {_, _, true} -> "info"
+        {_, true, _} -> "success"
+        {true, _, _} -> "active"
+        {_, _, _} -> ""
+      end
+
+      Map.put_new(day, :css_class, css_class)
+    end
+  end
+
+  def raw_days(starts_on \\ nil, ends_on \\ nil, country_id \\ "deutschland", federal_state_id \\ nil, city_id \\ nil, school_id \\ nil) do
     {starts_on, ends_on} = set_default_dates_if_needed(starts_on, ends_on)
 
     country = case country_id do
@@ -105,7 +137,7 @@ defmodule MehrSchulferien.Collect do
                 days.date_value <= ^ends_on,
           order_by: days.date_value,
           select: {map(days, [:date_value, :value, :weekday]),
-                  map(periods, [:id, :name, :slug]),
+                  map(periods, [:id, :name, :slug, :category]),
                   map(country, [:id, :name, :slug]),
                   map(federal_state, [:id, :name, :slug])
                 }
@@ -127,7 +159,7 @@ defmodule MehrSchulferien.Collect do
                 days.date_value <= ^ends_on,
           order_by: days.date_value,
           select: {map(days, [:date_value, :value, :weekday]),
-                  map(periods, [:id, :name, :slug]),
+                  map(periods, [:id, :name, :slug, :category]),
                   map(country, [:id, :name, :slug]),
                   map(federal_state, [:id, :name, :slug])
                 }
@@ -136,11 +168,6 @@ defmodule MehrSchulferien.Collect do
     end
 
     Repo.all(query)
-    |> Enum.uniq
-    |> Enum.group_by(fn {date, _, _, _} -> date end, fn {_, period, country, federal_state} -> {period, country, federal_state} end)
-    |> Enum.map(fn {date, periods} -> date
-    |> Map.put(:periods, Enum.reject(periods, fn(x) -> x == {nil,nil,nil} end)) end)
-    |> Enum.sort_by(fn x -> Date.to_string(x[:date_value]) end)
   end
 
   def set_default_dates_if_needed(starts_on, ends_on) do

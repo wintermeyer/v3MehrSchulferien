@@ -43,15 +43,9 @@
                       <%= if day == {} do %>
                         <td></td>
                       <% else %>
-                        <%= if day[:weekday] == 6 or day[:weekday] == 7 do %>
-                          <td class="text-right active">
-                            <%= day[:value] %>.
-                          </td>
-                        <% else %>
-                          <td class="text-right ">
-                            <%= day[:value] %>.
-                          </td>
-                        <% end %>
+                        <td class="text-right <%= day[:css_class] %>">
+                          <%= day[:value] %>.
+                        </td>
                       <% end %>
                     <% end %>
                  </tr>
